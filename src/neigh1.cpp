@@ -25,7 +25,7 @@ bool checking(vector<vector<int>> &L, int &item, vector<int> t, vector<int> p, i
         Se não for possível, retornar false
     */ 
 
-    for (int i = 0; i < L.size(); i++) {  
+    for (int i = 0; i < L.size(); i++) {   
         if (L[i][0] == t[item]) {
             for (int j = 0; j < t.size(); j++) {
                 if (t[j] == L[i][1]) {
