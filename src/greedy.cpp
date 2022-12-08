@@ -14,7 +14,9 @@ void quick_sort(vector<int> &p, int left, int right);
 int main(void) {
     string filename = "../instances/n30_k150_A.txt";
     vector<vector<int>> L;
+
     vector<int> p;
+    vector<int> aux;
     int Q, k, nElemL, numeroPresentes;
     readFile(filename, L, p, Q, k, nElemL, numeroPresentes); // Passagem por referência, a função modifica esses caras
 
@@ -58,29 +60,66 @@ void readFile(string filename, vector<vector<int>> &L, vector<int> &p, int &nume
     file.close();
 }
 
-void quick_sort(vector<int> &p, int left, int right) {
-    int i = left, j = right;
-    int tmp;
-    int pivot = p[(left + right) / 2];
 
-    /* partition */
-    while (i <= j) {
-        while (p[i] < pivot)
+
+
+void merge(vector<int> &p, vector<int> &aux, int left, int middle, int right) {
+    int i, j, k;
+    int n1 = middle - left + 1;
+    int n2 = right - middle;
+
+    /* create temp arrays */
+    int L[n1], R[n2];
+
+    /* Copy data to temp arrays L[] and R[] */
+    for (i = 0; i < n1; i++)
+        L[i] = p[left + i];
+    for (j = 0; j < n2; j++)
+        R[j] = p[middle + 1 + j];
+
+    /* Merge the temp arrays back into p[left..right]*/
+    i = 0; // Initial index of first subarray
+    j = 0; // Initial index of second subarray
+    k = left; // Initial index of merged subarray
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            aux[k] = i;
+            p[k] = L[i];
             i++;
-        while (p[j] > pivot)
-            j--;
-        if (i <= j) {
-            tmp = p[i];
-            p[i] = p[j];
-            p[j] = tmp;
-            i++;
-            j--;
+        } else {
+            aux[k] = i;
+            p[k] = R[j];
+            j++;
         }
-    };
+        k++;
+    }
 
-    /* recursion */
-    if (left < j)
-        quick_sort(p, left, j);
-    if (i < right)
-        quick_sort(p, i, right);
+    /* Copy the remaining elements of L[], if there
+       are any */
+    while (i < n1) {
+        p[k] = L[i];
+        aux[k] = i;
+        i++;
+        k++;
+    }
+
+    /* Copy the remaining elements of R[], if there
+       are any */
+    while (j < n2) {
+        p[k] = R[j];
+        aux[k] = j;
+        j++;
+        k++;
+    }
 }
+
+
+void mergeSort(vector<int> &p, vector<int> &aux, int left, int right) {
+    if (left < right) {
+        int middle = (left + right) / 2;
+        mergeSort(p, aux, left, middle);
+        mergeSort(p, aux, middle + 1, right);
+        merge(p, aux, left, middle, right);
+    }
+}
+

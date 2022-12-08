@@ -119,7 +119,7 @@ void greedyalgorithm(vector<vector<int>> L, vector<int> &p, int &numeroPresentes
     int numeroPresentesTreno = 0;
     for (int i = 0; i < nElemL; i++) {
         for (int j = 0; j < numeroPresentes; j++) {
-            if (L[i][j] != 1) {
+            if (matrix[i][j] != 1) {
                 if (peso + p[j] <= Q) {
                     peso += p[j];
                     numeroPresentesTreno++;
