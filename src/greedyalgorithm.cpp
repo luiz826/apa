@@ -2,19 +2,23 @@
 #include<fstream>
 #include<string>
 #include<vector>
+#include<array>
 
 using namespace std;
 
 void readFile(string filename, vector<vector<int>> &L, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL);
-void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL);
+void readFile2(string filename, vector<vector<int>> &L, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL); 
+void greedyalgorithm(vector<vector<int>>, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL);
 
 int main(void) {
-    string filename = "../instances/n30_k150_A.txt";
+    string filename = "/home/luiz/Documents/UFPB/apa/apa/instances/n30_k150_A.txt";
     vector<vector<int>> L;
     vector<int> p;
-    int Q, k, nElemL, numeroPresentes;
-    readFile(filename, L, p, numeroPresentes, k, Q, nElemL); // Passagem por referência, a função modifica esses caras
+    int Q, k, numeroPresentes, nElemL;
+    readFile2(filename, L, p, numeroPresentes, k, Q, nElemL); // Passagem por referência, a função modifica esses caras
+
     greedyalgorithm(L, p, numeroPresentes, k, Q, nElemL);
+
 
     return 0;
 }
@@ -35,7 +39,10 @@ void readFile(string filename, vector<vector<int>> &L, vector<int> &p, int &nume
     ifstream file;
     file.open(filename);
     if (file.is_open()) {
+        cout << "OPENED" << endl;
         file >> numeroPresentes >> k >> Q >> nElemL;
+
+        cout << numeroPresentes << endl;
         for (int i = 0; i < nElemL; i++) {
             vector<int> aux;
             for (int j = 0; j < numeroPresentes; j++) {
@@ -52,16 +59,67 @@ void readFile(string filename, vector<vector<int>> &L, vector<int> &p, int &nume
         }
     }
     file.close();
+
 }
 
-void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL) {
+void readFile2(string filename, vector<vector<int>> &L, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL, int **aux) {
+    // read file
+    ifstream file(filename);
+    string line, space1, space2;
+    int line_number = 0;
+
+    file >> line;
+    file >> numeroPresentes;
+    file >> k;
+    file >> Q;
+    file >> nElemL;
+    // file >> space1;
+
+    // read p
+    for (int i = 0; i < numeroPresentes; i++) {
+        file >> line;
+        p.push_back(stoi(line));
+    }
+
+    // file >> space2;
+    // read L
+    for (int i = 0; i < nElemL; i++) {
+        vector<int> eachLine;
+        for (int j = 0; j < 2; j++) {
+            // cout << " j: " << j << endl;
+            file >> line;
+            eachLine.push_back(stoi(line));
+        }
+        L.push_back(eachLine);
+    }
+
+    file.close();
+}
+
+
+void greedyalgorithm(vector<vector<int>> L, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL) {
+
+    int matrix[nElemL][nElemL]; 
+    
+    for (int i = 0; i < nElemL; i++) {
+        for (int j = 0; j < nElemL; j++) {
+            matrix[i][j] = 0;
+        }
+    }
+
+    for (int i = 0; i < nElemL; i++) {
+        matrix[L[i][0]-1][L[i][1]-1] = 1;
+        matrix[L[i][1]-1][L[i][0]-1] = 1;
+    }
+
+
     vector<treno> trenos;
     vector<int> presentes;
     int peso = 0;
     int numeroPresentesTreno = 0;
     for (int i = 0; i < nElemL; i++) {
         for (int j = 0; j < numeroPresentes; j++) {
-            if (L[i][j] == 1) {
+            if (L[i][j] != 1) {
                 if (peso + p[j] <= Q) {
                     peso += p[j];
                     numeroPresentesTreno++;
