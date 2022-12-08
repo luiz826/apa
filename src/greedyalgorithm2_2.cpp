@@ -69,9 +69,19 @@ class treno {
             }
             cout << endl;
         }
+
+        vector<int> getPresentes() {
+            vector<int> presentes;
+            for (int i = 0; i < this->n_presentes; i++) {
+                presentes.push_back(this->presentes[i].id);
+            }
+            return presentes;
+        }
+
+
 };
 
-void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes, int &k, int &Q, int &nElemL) {
+void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes, int &k, int &Q, int &nElemL, vector<vector<int>> &sol) {
     vector<treno> trenos;
     for (int i = 0; i < k; i++) {
         trenos.push_back(treno(Q)); // i -> id do treno, Q -> capacidade do treno 
@@ -94,13 +104,6 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
         matrix[L[w][1]-1][L[w][0]-1] = 1;
     }
 
-    // for (int w = 0; w < numeroPresentes; w++) {
-    //     for (int e = 0; e < numeroPresentes; e++) {
-    //         cout << matrix[w][e] << " ";
-    //     }
-    //     cout << endl;
-    // }
-
     vector<int> presentes;
     vector<int> pesosOrd;
     multimap<int, int> presentesPesos; 
@@ -114,7 +117,7 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
     }
 
     // GULOSO DE FATO
-    // int contadoooor = 0;
+    
     for (int i = numeroPresentes-1; i > 0; i--) { 
         cout << "PRESENTE " << presentes[i] << endl << endl; 
         cout << "-----------------------------" << endl;
@@ -159,12 +162,28 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
         // contadoooor++;
 
         // if (contadoooor == 5){break;}
-            
+        
     }
+    
+    //vector<vector<int>> solucao;
+    int fo = 0;
+    for (int i = 0; i < k; i++) {
+        if (trenos[i].n_presentes > 0) {
+            fo++;
+        }
+    }
+    sol.resize(fo);
+    
 
     for (int i = 0; i < k; i++) {
-        trenos[i].printTreno(i);
+        if (trenos[i].n_presentes > 0) {
+            vector<int> presentes_i = trenos[i].getPresentes();
+            for (int j = 0; j < presentes_i.size(); j++) {            
+                sol[i].push_back(presentes_i[j]);
+            }            
+        }
     }
+
 }
 
 
@@ -176,7 +195,15 @@ int main(void) {
     int Q, k, nElemL, numeroPresentes;
     readFile(filename, L, p, numeroPresentes, k, Q, nElemL); // Passagem por referência, a função modifica esses caras
     // cout << numeroPresentes << endl;
-    greedyalgorithm(L, p, numeroPresentes, k, Q, nElemL);
+    vector<vector<int>> sol;
+    greedyalgorithm(L, p, numeroPresentes, k, Q, nElemL, sol);
+    
+    for (int i = 0; i < sol.size(); i++) {
+        for (int j = 0; j < sol[i].size(); j++) {
+            cout << sol[i][j] << " ";
+        }
+        cout << endl;
+    }
 
     return 0;
 }
