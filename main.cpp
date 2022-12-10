@@ -36,11 +36,11 @@ class treno {
         }
          
         void printTreno(int t) {
-            cout << "Treno " << t << " com " << this->n_presentes << " presentes: ";
+            // cout << "Treno " << t << " com " << this->n_presentes << " presentes: ";
             for (int i = 0; i < this->n_presentes; i++) {
                 cout << this->presentes[i].id << " ";
             }
-            cout << endl;
+            // cout << endl;
         }
 
         vector<int> getPresentes() {
@@ -54,7 +54,11 @@ class treno {
 
 };
 
-void readFile(string filename, vector<vector<int>> &L, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL) {
+// class movimento {
+    
+// };
+
+void readFile(string filename, vector<vector<int>> &L, vector<vector<int>> &matrix, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL) {
     ifstream file(filename);
     string line, space1, space2;
     int line_number = 0;
@@ -77,44 +81,50 @@ void readFile(string filename, vector<vector<int>> &L, vector<int> &p, int &nume
             eachLine.push_back(stoi(line));
         }
         L.push_back(eachLine);
+        
     }
     
+    matrix.resize(numeroPresentes);
+    for (int i = 0; i < numeroPresentes; i++) {
+        matrix[i].resize(numeroPresentes);
+    }
+
+    for (int h = 0; h < numeroPresentes; h++) {
+        for (int e = 0; e < numeroPresentes; e++) {
+            matrix[h][e] = 0;        
+        }
+    }
+
+    for (int w = 0; w < nElemL; w++) {
+        matrix[L[w][0]-1][L[w][1]-1] = 1;
+        matrix[L[w][1]-1][L[w][0]-1] = 1;
+    }
+
+    // for (int i = 0; i < numeroPresentes; i++) {
+    //     for (int j = 0; j < numeroPresentes; j++) {
+    //         cout << matrix[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
+
     file.close();
 }
 
-bool checking(vector<vector<int>> &L, int &item, vector<int> t, vector<int> p, int Q) {
+bool checkingWei(int &item, vector<int> treno, vector<int> p, int Q) {
     /*  
         Se for possível, fazer o swap e retornar true
         Se não for possível, retornar false
     */ 
 
-    for (int i = 0; i < L.size(); i++) {   
-        if (L[i][0] == t[item]) {
-            for (int j = 0; j < t.size(); j++) {
-                if (t[j] == L[i][1]) {
-                    return false; // não é possível fazer o swap
-                }
-            }
-        }
-        if (L[i][1] == t[item]) {
-            for (int j = 0; j < t.size(); j++) {
-                if (t[j] == L[i][0]) {
-                    return false; // não é possível fazer o swap
-                }
-            }
-        }
-    }
-
     int sum_w = 0;
-    for (int i=0; i < t.size(); i++) {
-        sum_w += p[t[i]];      
+    for (int i=0; i < treno.size(); i++) {
+        sum_w += p[treno[i]-1];      
     }
 
 
-    if ((sum_w + p[t[item]]) > Q) {
+    if ((sum_w + p[item-1]) > Q) {
         return false;
     }
-
 
     return true; 
 }
@@ -125,16 +135,21 @@ void swap(int &i1, int &i2) {
     i2 = temp;
 }
 
-bool reinsertion(vector<vector<int>> &L, vector<vector<int>> &sol, int &item, int t, vector<int> p, int Q) {
+bool reinsertion(vector<vector<int>> &matrix, vector<vector<int>> &sol, int &item, int t, vector<int> p, int Q) {
     /*  Reinsere o item no trenó com menos itens
         Se não for possível, então o item é descartado
     */
 
     for (int k = 0; k < sol.size(); k++) {
-        if (k != t) {
-            if (checking(L, item, sol[k], p, Q)){
-                sol[k].push_back(sol[t][item]);
-                return true;
+        if (k != t) {    
+            for (int i = 0; i < sol[k].size(); i++) {
+                // cout << "item: " << item << " sol[t][item]: " << sol[t][item] << " sol[k][i]: " << sol[k][i] << " matrix[sol[t][item]-1][sol[k][i]-1]: " << matrix[sol[t][item]-1][sol[k][i]-1] << endl;
+                if (matrix[sol[t][item]-1][sol[k][i]-1] == 0) {                    
+                    if (checkingWei(sol[t][item], sol[k], p, Q)) {
+                        sol[k].push_back(sol[t][item]);
+                        return true;
+                    }
+                }
             }
         }
     }
@@ -154,21 +169,30 @@ int fo(vector<vector<int>> solution) {
     return value;
 }
 
-vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int>> L, vector<int> p, int Q) {
-
+vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int>> matrix, vector<int> p, int Q) {
+    srand (time(NULL)); // serve para setar uma seed
     vector<vector<int>> best_sol = solution;
+    // cout << "inicia SWAP" << endl;
 
     for (int i = 0; i < solution.size()-1; i++) {
         for (int j = i+1; j < solution.size(); j++) {
 
             vector<vector<int>> tempSol;
             tempSol = solution; 
+
+            if ( tempSol[i].size() == 0 || tempSol[j].size() == 0 ) {
+                continue;
+            }
     
             int chooseItem1 = rand() % tempSol[i].size(); // escolhe um item aleatório do trenó 1
             int chooseItem2 = rand() % tempSol[j].size(); // escolhe um item aleatório do trenó 2
-            
-            if ((checking(L, chooseItem1, tempSol[j], p, Q)) & (checking(L, chooseItem2, tempSol[i], p, Q))) {
-                swap(tempSol[i][chooseItem1], tempSol[j][chooseItem2]); // faz o swap entre os itens
+
+            if (matrix[tempSol[i][chooseItem1]-1][tempSol[i][chooseItem2]-1] != 1) {
+                // cout << "check matrix" << endl;
+                if (checkingWei(tempSol[i][chooseItem1], tempSol[j], p, Q) && checkingWei(tempSol[j][chooseItem2], tempSol[i], p, Q)) {
+                    // cout << "check weight" << endl;
+                    swap(tempSol[i][chooseItem1], tempSol[j][chooseItem2]);
+                }
             }
 
             if (fo(tempSol) < fo(best_sol)) {
@@ -181,16 +205,7 @@ vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int
     return best_sol;
 }
 
-vector<vector<int>> movementReinsetion(vector<vector<int>> &solution, vector<vector<int>> L, vector<int> p, int Q) {
-    cout << "Reinsertion START" << endl;
-
-    for (int i = 0; i < solution.size(); i++) {
-        for (int j = 0; j < solution[i].size(); j++) {
-            cout << solution[i][j] << " ";
-        }
-        cout << endl;
-    }
-    cout << endl << "FO: " << fo(solution) << endl;
+vector<vector<int>> movementReinsetion(vector<vector<int>> &solution, vector<vector<int>> matrix, vector<int> p, int Q) {
 
 
     int best_fo_sol = fo(solution);
@@ -201,52 +216,52 @@ vector<vector<int>> movementReinsetion(vector<vector<int>> &solution, vector<vec
         vector<vector<int>> tempSol;
         tempSol = solution; // copia a solução atual para uma solução temporária
 
-        for (int item = 0; item < tempSol[i].size(); item++) {   
-            cout << "T" << endl;
-            bool check = reinsertion(L, tempSol, item, i, p, Q);
-
+        for (int item = 0; item < tempSol[i].size(); item++) {  
+            
+            bool check = reinsertion(matrix, tempSol, item, i, p, Q);
+            // cout << check << endl;
             if (check) {
                 tempSol[i].erase(tempSol[i].begin() + item);
                 item--;
             }
         }
+        // cout << "fo: " << fo(tempSol) << endl;
         
         if (fo(tempSol) < fo(best_sol)) {
             best_sol = tempSol;
         }
     }
 
-    cout << "Reinsertion END" << endl;
-
     return best_sol;
 }
 
-vector<vector<int>> movementSwapReinsetion(vector<vector<int>> &solution, vector<vector<int>> L, vector<int> p, int Q) {
-    cout << "Swap & Reinsertion START" << endl;
+vector<vector<int>> movementSwapReinsetion(vector<vector<int>> &solution, vector<vector<int>> matrix, vector<int> p, int Q) {
+    // cout << "Swap & Reinsertion START" << endl;
     vector<vector<int>> tempSol;
     tempSol = solution; // copia
 
-    tempSol = movementSwap(tempSol, L, p, Q);
-    tempSol = movementReinsetion(tempSol, L, p, Q);
+    tempSol = movementSwap(tempSol, matrix, p, Q);
+    tempSol = movementReinsetion(tempSol, matrix, p, Q);
 
-    cout << "Swap & Reinsertion END" << endl;
+    // cout << "Swap & Reinsertion END" << endl;
     return tempSol;
 }
 
-vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> L, vector<int> p, int numeroPresentes, int Q, int &nElemL) {
+vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> matrix, vector<int> p, int numeroPresentes, int Q, int &nElemL) {
     
     int mov = 1;
     int r = 2;
-    // int k = 1;
     vector<vector<int>> sol_ = solution;
     while (mov <= r) {
         
         switch (mov) {
             case 1:
-                sol_ = movementReinsetion(sol_, L, p, Q); // Reisertion 
+                sol_ = movementReinsetion(sol_, matrix, p, Q); // Reisertion 
+                // cout << "swap" << endl;
                 break;
             case 2:
-                sol_ = movementSwapReinsetion(sol_, L, p, Q); //Swap & Reinsertion 
+                sol_ = movementSwapReinsetion(sol_, matrix, p, Q); //Swap & Reinsertion 
+                // cout << "rein" << endl;
                 break;
         }
 
@@ -256,33 +271,18 @@ vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> L, vec
         } else {
             mov++;
         }
+        // cout << "Mov: " << mov << endl;
+        // cout << "FO: " << fo(solution) << endl;
         
     }
 
     return solution;
 }
 
-void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes, int &k, int &Q, int &nElemL, vector<vector<int>> &sol) {
+void greedyalgorithm(vector<vector<int>> &L, vector<vector<int>> matrix, vector<int> &p, int numeroPresentes, int &k, int &Q, int &nElemL, vector<vector<int>> &sol) {
     vector<treno> trenos;
     for (int i = 0; i < k; i++) {
         trenos.push_back(treno(Q)); // i -> id do treno, Q -> capacidade do treno 
-    }
-    
-    vector<vector<int>> matrix;
-    matrix.resize(numeroPresentes);
-    for (int i = 0; i < numeroPresentes; i++) {
-        matrix[i].resize(numeroPresentes);
-    }
-
-    for (int h = 0; h < numeroPresentes; h++) {
-        for (int e = 0; e < numeroPresentes; e++) {
-            matrix[h][e] = 0;        
-        }
-    }
-
-    for (int w = 0; w < nElemL; w++) {
-        matrix[L[w][0]-1][L[w][1]-1] = 1;
-        matrix[L[w][1]-1][L[w][0]-1] = 1;
     }
 
     vector<int> presentes;
@@ -300,7 +300,7 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
     // GULOSO DE FATO
     
     for (int i = numeroPresentes-1; i > 0; i--) { 
-        // cout << "PRESENTE " << presentes[i] << endl << endl; 
+        cout << "PRESENTE " << presentes[i] << " PESO: " << pesosOrd[i] << endl << endl; 
         // cout << "-----------------------------" << endl;
         int menor = 0;
         int flag = 0;
@@ -308,6 +308,7 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
         while (flag != 1) {// While para a mudança de trenós
             
             if (trenos[aux_treno].capacidade_atual == Q) { // Se o trenó estiver vazio
+                // cout << "TRENO VAZIO: " << trenos[aux_treno].capacidade_atual << endl;
                 // // cout << "Trenó vazio: " << aux_treno << endl;
                 // cout << "Primeiro addPresente " << endl;
                 trenos[aux_treno].addPresente(presentes[i], pesosOrd[i]);
@@ -319,26 +320,29 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
             else {
                 // // cout << "Trenó não vazio: " << aux_treno << endl;
                 treno copy_treno = trenos[aux_treno];
-                if ((trenos[aux_treno].capacidade_atual - pesosOrd[i]) >= 0){  // Se couber
-                    for (int k = 0; k < copy_treno.n_presentes; k++) { // Para todos os itens que já estão no trenó
-                        if (matrix[presentes[i]-1][trenos[aux_treno].presentes[k].id-1] == 1) { // Se o item que quer adicionar tem conflito com algum item que já está no trenó]) {
-                            aux_treno += 1;
-                            cout << "Entrou na restrição " << k << endl;
+                cout << "TRENO NAO VAZIO: " << trenos[aux_treno].capacidade_atual  - pesosOrd[i] << endl;
+                if ((trenos[aux_treno].capacidade_atual - pesosOrd[i]) > 0){  // Se couber
+                    cout << "TRENO NAO VAZIO (MAIOR Q ZERO): " << trenos[aux_treno].capacidade_atual  - pesosOrd[i] << endl;
+                    for (int j = 0; j < copy_treno.n_presentes; j++) { // Para todos os itens que já estão no trenó
+                        if (matrix[presentes[i]-1][trenos[aux_treno].presentes[j].id-1] == 1) { // Se o item que quer adicionar tem conflito com algum item que já está no trenó]) {
+                            aux_treno++;
+                            // cout << "Entrou na re/strição " << k << endl;
                             break;
                         }// else {
                     }
-                    cout << "Segundo add presente " << endl;
+                    // cout << "Segundo add presente " << endl;
                     trenos[aux_treno].addPresente(presentes[i], pesosOrd[i]); // Se passou por tudo, pode adicionar no indice
-                    cout << "Indice presente: " << presentes[i] << endl; // Já pode adicionar no indice
+                    // cout << "Indice presente: " << presentes[i] << endl; // Já pode adicionar no indice
                     // // cout << "Peso presente: " << pesosOrd[i] << endl;
 
                     flag = 1; // Muda a flag pra ir pro proximo item do loop            
                             // // cout << "Adicionou ao trenó não vazio. " << endl;
                         //}
                 } else {
-                    aux_treno += 1;
+                    aux_treno++;
                 }
             }
+
         }
         
     }    
@@ -364,32 +368,40 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
 }
 
 int main(void) {
-    string filename = "./instances/n30_k150_A.txt";
+    string filename = "./instances/n30_k150_B.txt";
     vector<vector<int>> L;
+    vector<vector<int>> matrix;
     vector<int> p;
     int Q, k, nElemL, numeroPresentes;
-    readFile(filename, L, p, numeroPresentes, k, Q, nElemL); // Passagem por referência, a função modifica esses caras
-    // cout << numeroPresentes << endl;
+    
+    readFile(filename, L, matrix, p, numeroPresentes, k, Q, nElemL); // Passagem por referência, a função modifica esses caras
     vector<vector<int>> sol;
-    greedyalgorithm(L, p, numeroPresentes, k, Q, nElemL, sol);
+    greedyalgorithm(L, matrix, p, numeroPresentes, k, Q, nElemL, sol);
+    cout << "Q: " << Q << endl; 
 
+
+    cout << endl << "Solucao GREEDY" << endl;
     for (int i = 0; i < sol.size(); i++) {
+        int pt = 0;
         for (int j = 0; j < sol[i].size(); j++) {
+            pt += p[sol[i][j]-1];
             cout << sol[i][j] << " ";
         }
-        cout << endl;
+        cout << "peso: "<< pt<<endl;
     }
-    cout << endl << fo(sol) << endl << endl;
+    cout << endl << "FO: "<<  fo(sol) << endl << endl;
 
-    sol = vnd(sol, L, p, numeroPresentes, Q, nElemL);
-
-    // for (int i = 0; i < sol.size(); i++) {
-    //     for (int j = 0; j < sol[i].size(); j++) {
-    //         cout << sol[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
-    // cout << endl << fo(sol) << endl;
+    sol = vnd(sol, matrix, p, numeroPresentes, Q, nElemL);
+    cout << endl << "Solucao BUSCA LOCAL" << endl;
+    for (int i = 0; i < sol.size(); i++) {
+        int pt = 0;
+        for (int j = 0; j < sol[i].size(); j++) {
+            pt += p[sol[i][j]-1];
+            cout << sol[i][j] << " ";
+        }
+        cout << "peso: "<< pt<<endl;
+    }
+    cout << endl << "FO: "<<  fo(sol) << endl << endl;
 
     return 0;
 }
