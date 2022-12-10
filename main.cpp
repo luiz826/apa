@@ -154,12 +154,8 @@ int fo(vector<vector<int>> solution) {
     return value;
 }
 
-vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int>> L, vector<int> p, int Q, int k) {
+vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int>> L, vector<int> p, int Q) {
 
-    srand (time(NULL)); // serve para setar uma seed
-    /* Não criei lista de itens, utilizei os próprios indices*/
-
-    int best_fo_sol = fo(solution);
     vector<vector<int>> best_sol = solution;
 
     for (int i = 0; i < solution.size()-1; i++) {
@@ -176,31 +172,26 @@ vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int
             }
 
             if (fo(tempSol) < fo(best_sol)) {
-                best_fo_sol = fo(tempSol);
                 best_sol = tempSol;
             }
 
-            int w;
-            for (auto &v : tempSol) {
-                w = 0;
-                for (auto &i : v) {
-                    cout << i << " ";
-                    w += p[i];
-                }
-                cout << " -> " << w << endl;
-            }
-
-            cout << "Função objetivo: " << fo(tempSol) << endl << endl;
         }
     }
 
     return best_sol;
 }
 
-vector<vector<int>> movementReinsetion(vector<vector<int>> &solution, vector<vector<int>> L, vector<int> p, int Q, int k) {
+vector<vector<int>> movementReinsetion(vector<vector<int>> &solution, vector<vector<int>> L, vector<int> p, int Q) {
+    cout << "Reinsertion START" << endl;
 
-    srand (time(NULL)); // serve para setar uma seed
-    /* Não criei lista de itens, utilizei os próprios indices*/
+    for (int i = 0; i < solution.size(); i++) {
+        for (int j = 0; j < solution[i].size(); j++) {
+            cout << solution[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl << "FO: " << fo(solution) << endl;
+
 
     int best_fo_sol = fo(solution);
     vector<vector<int>> best_sol = solution;
@@ -211,6 +202,7 @@ vector<vector<int>> movementReinsetion(vector<vector<int>> &solution, vector<vec
         tempSol = solution; // copia a solução atual para uma solução temporária
 
         for (int item = 0; item < tempSol[i].size(); item++) {   
+            cout << "T" << endl;
             bool check = reinsertion(L, tempSol, item, i, p, Q);
 
             if (check) {
@@ -220,40 +212,41 @@ vector<vector<int>> movementReinsetion(vector<vector<int>> &solution, vector<vec
         }
         
         if (fo(tempSol) < fo(best_sol)) {
-            best_fo_sol = fo(tempSol);
             best_sol = tempSol;
         }
-        
-        int w;
-        for (auto &v : tempSol) {
-            w = 0;
-            for (auto &i : v) {
-                cout << i << " ";
-                w += p[i];
-            }
-                cout << " -> " << w << endl;
-        }
-        cout << "Função objetivo: " << fo(tempSol) << endl;
-        // for (auto &v : tempSol) {
-        //     v.clear();
-        // }
     }
+
+    cout << "Reinsertion END" << endl;
 
     return best_sol;
 }
 
-vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> L, vector<int> p, int numeroPresentes, int Q, int k, int &nElemL) {
+vector<vector<int>> movementSwapReinsetion(vector<vector<int>> &solution, vector<vector<int>> L, vector<int> p, int Q) {
+    cout << "Swap & Reinsertion START" << endl;
+    vector<vector<int>> tempSol;
+    tempSol = solution; // copia
+
+    tempSol = movementSwap(tempSol, L, p, Q);
+    tempSol = movementReinsetion(tempSol, L, p, Q);
+
+    cout << "Swap & Reinsertion END" << endl;
+    return tempSol;
+}
+
+vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> L, vector<int> p, int numeroPresentes, int Q, int &nElemL) {
     
     int mov = 1;
     int r = 2;
-    while (k <= r) {
-        vector<vector<int>> sol_ = solution;
+    // int k = 1;
+    vector<vector<int>> sol_ = solution;
+    while (mov <= r) {
+        
         switch (mov) {
             case 1:
-                sol_ = movementSwap(sol_, L, p, Q, k); // Reisertion 
+                sol_ = movementReinsetion(sol_, L, p, Q); // Reisertion 
                 break;
             case 2:
-                sol_ = movementReinsetion(sol_, L, p, Q, k); //Swap & Reinsertion 
+                sol_ = movementSwapReinsetion(sol_, L, p, Q); //Swap & Reinsertion 
                 break;
         }
 
@@ -307,8 +300,8 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
     // GULOSO DE FATO
     
     for (int i = numeroPresentes-1; i > 0; i--) { 
-        cout << "PRESENTE " << presentes[i] << endl << endl; 
-        cout << "-----------------------------" << endl;
+        // cout << "PRESENTE " << presentes[i] << endl << endl; 
+        // cout << "-----------------------------" << endl;
         int menor = 0;
         int flag = 0;
         int aux_treno = 0;
@@ -316,9 +309,9 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
             
             if (trenos[aux_treno].capacidade_atual == Q) { // Se o trenó estiver vazio
                 // // cout << "Trenó vazio: " << aux_treno << endl;
-                cout << "Primeiro addPresente " << endl;
+                // cout << "Primeiro addPresente " << endl;
                 trenos[aux_treno].addPresente(presentes[i], pesosOrd[i]);
-                cout << "Indice presente: " << presentes[i] << endl; // Já pode adicionar no indice
+                // cout << "Indice presente: " << presentes[i] << endl; // Já pode adicionar no indice
                 //// cout << "Peso presente: " << pesosOrd[i] << endl;
                 flag = 1;
                 // // cout << "Adicionou ao trenó vazio. " << endl;
@@ -386,15 +379,17 @@ int main(void) {
         }
         cout << endl;
     }
+    cout << endl << fo(sol) << endl << endl;
 
-    sol = vnd(sol, L, p, numeroPresentes, k, Q, nElemL);
+    sol = vnd(sol, L, p, numeroPresentes, Q, nElemL);
 
-    for (int i = 0; i < sol.size(); i++) {
-        for (int j = 0; j < sol[i].size(); j++) {
-            cout << sol[i][j] << " ";
-        }
-        cout << endl;
-    }
+    // for (int i = 0; i < sol.size(); i++) {
+    //     for (int j = 0; j < sol[i].size(); j++) {
+    //         cout << sol[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
+    // cout << endl << fo(sol) << endl;
 
     return 0;
 }

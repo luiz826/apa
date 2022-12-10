@@ -22,10 +22,10 @@ vector<vector<int>> vnd(vector<vector<int>> &L, vector<vector<int>> &sol, vector
         vector<vector<int>> sol_;
         switch (k) {
             case 1:
-                sol_ = movementSwap(solution, L, p, Q, k);
+                sol_ = movementSwap(solution, L, p, Q, k); // Reisertion 
                 break;
             case 2:
-                sol_ = movementReinsetion(solution, L, p, Q, k);
+                sol_ = movementReinsetion(solution, L, p, Q, k); //Swap & Reinsertion 
                 break;
         }
 
