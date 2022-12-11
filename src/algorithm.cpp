@@ -1,118 +1,16 @@
-#include <iostream>
-#include <vector>
-#include <stdlib.h>     
 #include <time.h>
+#include <random>
 #include <map>
-#include <fstream>
-#include <regex>
 #include <chrono>
-#include <filesystem>
 
-namespace fs = std::filesystem;
 using namespace std::chrono;
+
+#include "treno.h"
+#include "algorithm.h"
+
+#include "presente.h"
+
 using namespace std;
-
-class presente {
-    public:
-        int id;
-        int peso;
-        presente(int id, int peso = 0) {
-            this->id = id;
-            this->peso = peso;
-        }
-};
-
-class treno {
-    public:
-        int capacidade;
-        int capacidade_atual;
-        int n_presentes = 0;
-        vector<presente> presentes;
-
-        treno(int capacidade) {
-            this->capacidade = capacidade;
-            this->capacidade_atual = capacidade;
-        }
-        void addPresente(int id, int peso) {
-            presente p(id, peso);
-            presentes.push_back(p);
-            this->n_presentes++;
-            this->capacidade_atual -= peso;
-        }
-         
-        void printTreno(int t) {
-            cout << "Treno " << t << " com " << this->n_presentes << " presentes: ";
-            for (int i = 0; i < this->n_presentes; i++) {
-                cout << this->presentes[i].id << " ";
-            }
-            cout << endl;
-        }
-
-        vector<int> getPresentes() {
-            vector<int> presentes;
-            for (int i = 0; i < this->n_presentes; i++) {
-                presentes.push_back(this->presentes[i].id);
-            }
-            return presentes;
-        }
-
-
-};
-
-// class movimento {
-    
-// };
- //vector<vector<int>> &matrix, 
-void readFile(string filename, vector<vector<int>> &L, vector<vector<int>> &matrix, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL) {
-    ifstream file(filename);
-    string line, space1, space2;
-    int line_number = 0;
-
-    file >> line;
-    file >> numeroPresentes;
-    file >> k;
-    file >> Q;
-    file >> nElemL;
-
-    for (int i = 0; i < numeroPresentes; i++) {
-        file >> line;
-        p.push_back(stoi(line));
-    }
-
-    for (int i = 0; i < nElemL; i++) {
-        vector<int> eachLine;
-        for (int j = 0; j < 2; j++) {
-            file >> line;
-            eachLine.push_back(stoi(line));
-        }
-        L.push_back(eachLine);
-        
-    }
-    int contm = 0;
-    matrix.resize(numeroPresentes);
-    for (int i = 0; i < numeroPresentes; i++) {
-        matrix[i].resize(numeroPresentes-contm);
-        contm--;
-    }
-    // matrix.resize(numeroPresentes);
-    // for (int i = 0; i < numeroPresentes; i++) {
-    //     matrix[i].resize(numeroPresentes);
-    // }
-
-    for (int h = 0; h < numeroPresentes; h++) {
-        for (int e = h+1; e < numeroPresentes; e++) {
-            matrix[h][e] = 0;        
-        }
-    }
-
-    
-    for (int w = 0; w < nElemL; w++) {
-        matrix[L[w][0]-1][L[w][1]-1] = 1;
-        
-    }
-
-    file.close();
-}
 
 bool checkingWei(int &item, vector<int> treno, vector<int> p, int Q) {
     /*  
@@ -272,18 +170,19 @@ vector<vector<int>> movementSwapReinsetion(vector<vector<int>> &solution, vector
     return best_sol;
 }
 
-void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPresentes, int &k, int &Q, int &nElemL, vector<vector<int>> &sol) {
+// void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPresentes, int &k, int &Q, int &nElemL, vector<vector<int>> &sol) {
+void greedyalgorithm(ProblemData &data, vector<vector<int>> &sol) {
     vector<treno> trenos;
-    for (int i = 0; i < k; i++) {
-        trenos.push_back(treno(Q)); // i -> id do treno, Q -> capacidade do treno 
+    for (int i = 0; i < data.k; i++) {
+        trenos.push_back(treno(data.Q)); // i -> id do treno, Q -> capacidade do treno 
     }
 
 
     vector<int> presentes;
     vector<int> pesosOrd;
     multimap<int, int> presentesPesos; 
-    for (int w = 1; w < numeroPresentes+1; w++) {
-        presentesPesos.insert(pair<int, int>(p[w-1], w));
+    for (int w = 1; w < data.numeroPresentes+1; w++) {
+        presentesPesos.insert(pair<int, int>(data.p[w-1], w));
     }    
     multimap<int, int>::iterator itr;
     for (itr = presentesPesos.begin(); itr != presentesPesos.end(); itr++) {
@@ -293,7 +192,7 @@ void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPres
 
     // GULOSO DE FATO
     
-    for (int i = numeroPresentes-1; i > 0; i--) { 
+    for (int i = data.numeroPresentes-1; i > 0; i--) { 
         // cout << "PRESENTE " << presentes[i] << " PESO: " << pesosOrd[i] << endl << endl; 
         // cout << "-----------------------------" << endl;
         int menor = 0;
@@ -301,7 +200,7 @@ void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPres
         int aux_treno = 0;
         while (flag != 1) {// While para a mudança de trenós
             
-            if (trenos[aux_treno].capacidade_atual == Q) { // Se o trenó estiver vazio
+            if (trenos[aux_treno].capacidade_atual == data.Q) { // Se o trenó estiver vazio
                 // cout << "TRENO VAZIO: " << trenos[aux_treno].capacidade_atual << endl;
                 // // cout << "Trenó vazio: " << aux_treno << endl;
                 // cout << "Primeiro addPresente " << endl;
@@ -321,7 +220,7 @@ void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPres
                     int flagTotal = 0;
                     for (int j = 0; j < copy_treno.n_presentes; j++) { // Para todos os itens que já estão no trenó
                         flagTotal++;
-                        if ((matrix[presentes[i]-1][trenos[aux_treno].presentes[j].id-1] == 1) || (matrix[trenos[aux_treno].presentes[j].id-1][presentes[i]-1] == 1)) { // Se o item que quer adicionar tem conflito com algum item que já está no trenó]) {
+                        if ((data.matrix[presentes[i]-1][trenos[aux_treno].presentes[j].id-1] == 1) || (data.matrix[trenos[aux_treno].presentes[j].id-1][presentes[i]-1] == 1)) { // Se o item que quer adicionar tem conflito com algum item que já está no trenó]) {
                             aux_treno++;
                             // cout << "Entrou na re/strição " << k << endl;
                             break;
@@ -354,7 +253,7 @@ void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPres
     }    
     
     int fo = 0;
-    for (int i = 0; i < k; i++) {
+    for (int i = 0; i < data.k; i++) {
         if (trenos[i].n_presentes > 0) {
             fo++;
         }
@@ -362,7 +261,7 @@ void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPres
     sol.resize(fo);
     
 
-    for (int i = 0; i < k; i++) {
+    for (int i = 0; i < data.k; i++) {
         if (trenos[i].n_presentes > 0) {
             vector<int> presentes_i = trenos[i].getPresentes();
             for (int j = 0; j < presentes_i.size(); j++) {            
@@ -372,7 +271,7 @@ void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPres
     }
 
     // Print pra ver a capacidade dos trenós
-    for (int i = 0; i < k; i++){
+    for (int i = 0; i < data.k; i++){
         if (trenos[i].n_presentes > 0){
             // cout << "Treno " << i << " capacidade atual: " << trenos[i].capacidade_atual << endl;
         }  
@@ -380,7 +279,7 @@ void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPres
 
 }
 
-vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> matrix, vector<int> p, int numeroPresentes, int Q, int &nElemL) {
+void vnd(vector<vector<int>> &solution, ProblemData &data) {
     
     int mov = 1;
     int r = 2;
@@ -389,11 +288,11 @@ vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> matrix
         
         switch (mov) {
             case 1:
-                sol_ = movementReinsetion(sol_, matrix, p, Q); // Reisertion 
+                sol_ = movementReinsetion(sol_, data.matrix, data.p, data.Q); // Reisertion 
                 // cout << "swap" << endl;
                 break;
             case 2:
-                sol_ = movementSwapReinsetion(sol_, matrix, p, Q); //Swap & Reinsertion 
+                sol_ = movementSwapReinsetion(sol_, data.matrix, data.p, data.Q); //Swap & Reinsertion 
                 // cout << "rein" << endl;
                 break;
         }
@@ -409,63 +308,31 @@ vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> matrix
         
     }
 
-    return solution;
+    // return solution;
 }
 
-int execute(string filename, ofstream &output) {
-
-    string filenameCompleto = "./instances/" + filename;
-    vector<vector<int>> L;
-    vector<vector<int>> matrix;
-    vector<vector<int>> sol;
-    vector<int> p;
-    int Q, k, nElemL, numeroPresentes;
+vector<vector<int>> naivePertubation(vector<vector<int>> solution, ProblemData &data) {
+    vector<vector<int>> pertubation = solution;
+    // Nova ideia: para cada trenó 
+    // Se o trenó tiver solução com tamanho maior que um
+    // pega o ultimo e joga em um trenó vazio.
     
-    output << filename + ", ";
+    pertubation.resize(data.k);
 
-    output << "-1, ";
-    
-    readFile(filenameCompleto, L, matrix, p, numeroPresentes, k, Q, nElemL); // Passagem por referência, a função modifica esses caras
-    
-    auto startGreedy = high_resolution_clock::now();
-    greedyalgorithm(matrix, p, numeroPresentes, k, Q, nElemL, sol);
-    auto stopGreedy = high_resolution_clock::now();
-    auto durationGreedy = duration_cast<microseconds>(stopGreedy - startGreedy);
+    int proxTreno = 0;
+    int tamSolucao = fo(solution);
 
-    
-
-    output << to_string(fo(sol)) + ", ";
-    output << to_string(durationGreedy.count()) + ", ";
-    output << "-1, ";
-    
-    auto startVnd = high_resolution_clock::now();
-    sol = vnd(sol, matrix, p, numeroPresentes, Q, nElemL);
-    auto stopVnd = high_resolution_clock::now();
-    auto durationVnd = duration_cast<microseconds>(stopVnd - startVnd);
-
-    output << to_string(fo(sol)) + ", ";
-    output << to_string(durationVnd.count()) + ", ";
-    output << "-1\n";
-
-
-    return 0;
-}
-
-int main(void) {
-    ofstream output("output.txt");
-
-    string path = "./instances";
-    for (const auto & entry : fs::directory_iterator(path)) {
-        if (entry.path().filename() == "otimos.txt" || entry.path().filename() == ".DS_Store") {
-            continue;
+    for (int i=0; i < tamSolucao; i++) { // Para cada trenós com soluções
+        // cout << "Trenó: " << proxTreno << endl;
+        // cout << solution[i].size() << endl;
+        if (solution[i].size() > 1) {
+            pertubation[tamSolucao+proxTreno].push_back(solution[i][1]); // O 1 aqui é pra pegar o prox independente
+            pertubation[i].erase(pertubation[i].begin() + 1);
+            proxTreno++;
         }
-
         
-        for (int j = 0; j < 10; j++) {
-            cout << "Executando " << entry.path().filename() << " " << j << endl;
-            execute(entry.path().filename(), output);
-        }
-    }    
+    } 
 
-    output.close();
+    return pertubation;
 }
+
