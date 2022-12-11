@@ -18,7 +18,7 @@ int main(void) {
     readFile2(filename, L, p, numeroPresentes, k, Q, nElemL); // Passagem por referência, a função modifica esses caras
 
     greedyalgorithm(L, p, numeroPresentes, k, Q, nElemL);
-
+    cout << "A";
 
     return 0;
 }

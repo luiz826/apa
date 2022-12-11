@@ -360,6 +360,11 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
             }            
         }
     }
+    // Print pra ver a capacidade dos trenós
+    for (int i = 0; i < k; i++){
+        if (trenos[i].n_presentes > 0){
+            cout << "Treno " << i << " capacidade atual: " << trenos[i].capacidade_atual << endl;
+    }   }
 
 }
 
