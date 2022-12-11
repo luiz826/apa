@@ -503,7 +503,7 @@ vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> matrix
 
 int main(void) {
 
-    string filename = "./instances/n80_k130_C.txt";
+    string filename = "./instances/n1000_k200_B.txt";
     vector<vector<int>> L;
     vector<vector<int>> matrix;
     vector<int> p;
