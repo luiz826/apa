@@ -1,10 +1,18 @@
-#include <iostream>
-#include <vector>
-using namespace std;
-
 #ifndef READ_FILE_H_INCLUDED
 #define READ_FILE_H_INCLUDED
 
-void read_file(string filename, vector<vector<int>> &L, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL);
+#include <iostream>
+#include <vector>
+
+#include "problem_data.h"
+
+using namespace std;
+
+
+
+// void readFile(string filename, vector<vector<int>> &L, vector<vector<int>> &matrix, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL);
+
+void readFile(string filename, ProblemData &data);
+
 
 #endif
