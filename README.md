@@ -20,9 +20,11 @@ Neste ano, o Papai Noel encarregou um de seus ajudantes de pesquisar alguma form
 
 ## Execução do Código
 
-`$ cd /src`
-`$ g++ main.cpp read_file.cpp algorithm.cpp -std=c++17`
-`$ ./a.out`
+```
+$ cd /src
+$ g++ main.cpp read_file.cpp algorithm.cpp -std=c++17
+$ ./a.out
+```
 
 A saída irá ser uma tabela na pasta outputs, com os dados pedidos pelo professor
 
