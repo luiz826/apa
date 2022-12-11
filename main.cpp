@@ -58,7 +58,7 @@ class treno {
     
 // };
  //vector<vector<int>> &matrix, 
-void readFile(string filename, vector<vector<int>> &L, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL) {
+void readFile(string filename, vector<vector<int>> &L, vector<vector<int>> &matrix, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL) {
     ifstream file(filename);
     string line, space1, space2;
     int line_number = 0;
@@ -84,28 +84,35 @@ void readFile(string filename, vector<vector<int>> &L, vector<int> &p, int &nume
         
     }
     
-    // matrix.resize(numeroPresentes);
-    // for (int i = 0; i < numeroPresentes; i++) {
-    //     matrix[i].resize(numeroPresentes);
-    // }
+    matrix.resize(numeroPresentes);
+    for (int i = 0; i < numeroPresentes; i++) {
+        matrix[i].resize(numeroPresentes);
+    }
 
-    // for (int h = 0; h < numeroPresentes; h++) {
-    //     for (int e = 0; e < numeroPresentes; e++) {
-    //         matrix[h][e] = 0;        
-    //     }
-    // }
+    for (int h = 0; h < numeroPresentes; h++) {
+        for (int e = 0; e < numeroPresentes; e++) {
+            matrix[h][e] = 0;        
+        }
+    }
 
-    // for (int w = 0; w < nElemL; w++) {
-    //     matrix[L[w][0]-1][L[w][1]-1] = 1;
-    //     matrix[L[w][1]-1][L[w][0]-1] = 1;
-    // }
+    
+    for (int w = 0; w < nElemL; w++) {
+        matrix[L[w][0]-1][L[w][1]-1] = 1;
+        matrix[L[w][1]-1][L[w][0]-1] = 1;
+        
+    }
+    int cont =0;
+    for (int i = 0; i < numeroPresentes; i++) {
+        for (int j = 0; j < numeroPresentes; j++) {
+            cout << matrix[i][j] << " ";
+            if (matrix[i][j] == 1) {
+                cont++;
+            }
+        }
+        cout << endl;
+    }
 
-    // for (int i = 0; i < numeroPresentes; i++) {
-    //     for (int j = 0; j < numeroPresentes; j++) {
-    //         cout << matrix[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
+    cout << cont << endl;
 
     file.close();
 }
@@ -187,7 +194,7 @@ vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int
             int chooseItem1 = rand() % tempSol[i].size(); // escolhe um item aleatório do trenó 1
             int chooseItem2 = rand() % tempSol[j].size(); // escolhe um item aleatório do trenó 2
 
-            if (matrix[tempSol[i][chooseItem1]-1][tempSol[i][chooseItem2]-1] != 1) {
+            if (matrix[tempSol[i][chooseItem1]-1][tempSol[j][chooseItem2]-1] != 1) {
                 // cout << "check matrix" << endl;
                 if (checkingWei(tempSol[i][chooseItem1], tempSol[j], p, Q) && checkingWei(tempSol[j][chooseItem2], tempSol[i], p, Q)) {
                     // cout << "check weight" << endl;
@@ -247,29 +254,12 @@ vector<vector<int>> movementSwapReinsetion(vector<vector<int>> &solution, vector
     return tempSol;
 }
 
-void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes, int &k, int &Q, int &nElemL, vector<vector<int>> &sol) {
+void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPresentes, int &k, int &Q, int &nElemL, vector<vector<int>> &sol) {
     vector<treno> trenos;
     for (int i = 0; i < k; i++) {
         trenos.push_back(treno(Q)); // i -> id do treno, Q -> capacidade do treno 
     }
 
-    vector<vector<int>> matrix;
-
-    matrix.resize(numeroPresentes);
-    for (int i = 0; i < numeroPresentes; i++) {
-        matrix[i].resize(numeroPresentes);
-    }
-
-    for (int h = 0; h < numeroPresentes; h++) {
-        for (int e = 0; e < numeroPresentes; e++) {
-            matrix[h][e] = 0;        
-        }
-    }
-
-    for (int w = 0; w < nElemL; w++) {
-        matrix[L[w][0]-1][L[w][1]-1] = 1;
-        matrix[L[w][1]-1][L[w][0]-1] = 1;
-    }
 
     vector<int> presentes;
     vector<int> pesosOrd;
@@ -309,19 +299,31 @@ void greedyalgorithm(vector<vector<int>> &L, vector<int> &p, int numeroPresentes
                 // cout << "TRENO NAO VAZIO: " << trenos[aux_treno].capacidade_atual  - pesosOrd[i] << endl;
                 if ((trenos[aux_treno].capacidade_atual - pesosOrd[i]) >= 0){  // Se couber
                     // cout << "TRENO NAO VAZIO (MAIOR Q ZERO): " << trenos[aux_treno].capacidade_atual  - pesosOrd[i] << endl;
+                    int flagNaoConflito = 0; // Isso é pra não adicionar o item no trenó se ele tiver conflito com algum item que já está no trenó
+                    int flagTotal = 0;
                     for (int j = 0; j < copy_treno.n_presentes; j++) { // Para todos os itens que já estão no trenó
+                        flagTotal++;
                         if (matrix[presentes[i]-1][trenos[aux_treno].presentes[j].id-1] == 1) { // Se o item que quer adicionar tem conflito com algum item que já está no trenó]) {
                             aux_treno++;
                             // cout << "Entrou na re/strição " << k << endl;
                             break;
-                        }// else {
+                        } else {
+                            flagNaoConflito++;
+                        }                        
+                    }
+
+                    if (flagNaoConflito == flagTotal) { // Se passou por tudo, pode adicionar no indice
+                        // cout << "Segundo addPresente " << endl;
+                        trenos[aux_treno].addPresente(presentes[i], pesosOrd[i]); // Se passou por tudo, pode adicionar no indice
+                        flag = 1;
                     }
                     // cout << "Segundo add presente " << endl;
-                    trenos[aux_treno].addPresente(presentes[i], pesosOrd[i]); // Se passou por tudo, pode adicionar no indice
+
+                    
                     // cout << "Indice presente: " << presentes[i] << endl; // Já pode adicionar no indice
                     // // cout << "Peso presente: " << pesosOrd[i] << endl;
 
-                    flag = 1; // Muda a flag pra ir pro proximo item do loop            
+                    // flag = 1; // Muda a flag pra ir pro proximo item do loop            
                             // // cout << "Adicionou ao trenó não vazio. " << endl;
                         //}
                 } else {
@@ -497,23 +499,29 @@ vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> matrix
 
     return solution;
 }
-//, vector<vector<int>> &matrix
+//, 
 
 int main(void) {
-    string filename = "./instances/n30_k150_B.txt";
+
+    string filename = "./instances/n80_k130_C.txt";
     vector<vector<int>> L;
-    // vector<vector<int>> matrix;
+    vector<vector<int>> matrix;
     vector<int> p;
     int Q, k, nElemL, numeroPresentes;
+
+    readFile(filename, L,matrix, p, numeroPresentes, k, Q, nElemL); // Passagem por referência, a função modifica esses caras
     
-    readFile(filename, L, p, numeroPresentes, k, Q, nElemL); // Passagem por referência, a função modifica esses caras
+    cout << "Q = " << Q << endl;
+    cout << "k = " << k << endl;
+    cout << "nElemL = " << nElemL << endl;
+    cout << "numeroPresentes = " << numeroPresentes << endl;
+
+
     vector<vector<int>> sol;
     // matrix,
-    //greedyalgorithm(L, p, numeroPresentes, k, Q, nElemL, sol);
-    greedyalgorithm2(L, p, numeroPresentes, k, Q, nElemL, sol);
-    cout << "Q: " << Q << endl; 
-
-
+    greedyalgorithm(matrix, p, numeroPresentes, k, Q, nElemL, sol);
+    // greedyalgorithm2(L, p, numeroPresentes, k, Q, nElemL, sol);
+    cout << matrix[20][71] << endl;
     cout << endl << "Solucao GREEDY" << endl;
     for (int i = 0; i < sol.size(); i++) {
         int pt = 0;
@@ -525,17 +533,17 @@ int main(void) {
     }
     cout << endl << "FO: "<<  fo(sol) << endl << endl;
 
-    // sol = vnd(sol, matrix, p, numeroPresentes, Q, nElemL);
-    // cout << endl << "Solucao BUSCA LOCAL" << endl;
-    // for (int i = 0; i < sol.size(); i++) {
-    //     int pt = 0;
-    //     for (int j = 0; j < sol[i].size(); j++) {
-    //         pt += p[sol[i][j]-1];
-    //         cout << sol[i][j] << " ";
-    //     }
-    //     cout << "peso: "<< pt<<endl;
-    // }
-    // cout << endl << "FO: "<<  fo(sol) << endl << endl;
+    sol = vnd(sol, matrix, p, numeroPresentes, Q, nElemL);
+    cout << endl << "Solucao BUSCA LOCAL" << endl;
+    for (int i = 0; i < sol.size(); i++) {
+        int pt = 0;
+        for (int j = 0; j < sol[i].size(); j++) {
+            pt += p[sol[i][j]-1];
+            cout << sol[i][j] << " ";
+        }
+        cout << "peso: "<< pt<<endl;
+    }
+    cout << endl << "FO: "<<  fo(sol) << endl << endl;
 
     return 0;
 }
