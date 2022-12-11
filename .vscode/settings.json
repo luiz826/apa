@@ -5,6 +5,8 @@
         "fstream": "cpp",
         "vector": "cpp",
         "sstream": "cpp",
-        "array": "cpp"
+        "array": "cpp",
+        "iosfwd": "cpp",
+        "chrono": "cpp"
     }
 }
