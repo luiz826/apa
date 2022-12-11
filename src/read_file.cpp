@@ -100,10 +100,6 @@ void readFile(string filename, ProblemData &data) {
         data.matrix[i].resize(data.numeroPresentes-contm);
         contm--;
     }
-    // matrix.resize(numeroPresentes);
-    // for (int i = 0; i < numeroPresentes; i++) {
-    //     matrix[i].resize(numeroPresentes);
-    // }
 
     for (int h = 0; h < data.numeroPresentes; h++) {
         for (int e = h+1; e < data.numeroPresentes; e++) {

@@ -1,6 +1,9 @@
 #include <time.h>
 #include <random>
 #include <map>
+#include <chrono>
+
+using namespace std::chrono;
 
 #include "treno.h"
 #include "algorithm.h"
@@ -276,7 +279,7 @@ void greedyalgorithm(ProblemData &data, vector<vector<int>> &sol) {
 
 }
 
-vector<vector<int>> vnd(vector<vector<int>> &solution, ProblemData &data) {
+void vnd(vector<vector<int>> &solution, ProblemData &data) {
     
     int mov = 1;
     int r = 2;
@@ -305,5 +308,31 @@ vector<vector<int>> vnd(vector<vector<int>> &solution, ProblemData &data) {
         
     }
 
-    return solution;
+    // return solution;
 }
+
+vector<vector<int>> naivePertubation(vector<vector<int>> solution, ProblemData &data) {
+    vector<vector<int>> pertubation = solution;
+    // Nova ideia: para cada trenó 
+    // Se o trenó tiver solução com tamanho maior que um
+    // pega o ultimo e joga em um trenó vazio.
+    
+    pertubation.resize(data.k);
+
+    int proxTreno = 0;
+    int tamSolucao = fo(solution);
+
+    for (int i=0; i < tamSolucao; i++) { // Para cada trenós com soluções
+        // cout << "Trenó: " << proxTreno << endl;
+        // cout << solution[i].size() << endl;
+        if (solution[i].size() > 1) {
+            pertubation[tamSolucao+proxTreno].push_back(solution[i][1]); // O 1 aqui é pra pegar o prox independente
+            pertubation[i].erase(pertubation[i].begin() + 1);
+            proxTreno++;
+        }
+        
+    } 
+
+    return pertubation;
+}
+

@@ -14,4 +14,5 @@ vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int
 vector<vector<int>> movementReinsetion(vector<vector<int>> &solution, vector<vector<int>> matrix, vector<int> p, int Q);
 vector<vector<int>> movementSwapReinsetion(vector<vector<int>> &solution, vector<vector<int>> matrix, vector<int> p, int Q);
 void greedyalgorithm(ProblemData &data, vector<vector<int>> &sol);
-vector<vector<int>> vnd(vector<vector<int>> &solution, ProblemData &data);
+void vnd(vector<vector<int>> &solution, ProblemData &data);
+vector<vector<int>> naivePertubation(vector<vector<int>> solution, ProblemData &data);
