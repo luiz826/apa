@@ -83,14 +83,19 @@ void readFile(string filename, vector<vector<int>> &L, vector<vector<int>> &matr
         L.push_back(eachLine);
         
     }
-    
+    int contm = 0;
     matrix.resize(numeroPresentes);
     for (int i = 0; i < numeroPresentes; i++) {
-        matrix[i].resize(numeroPresentes);
+        matrix[i].resize(numeroPresentes-contm);
+        contm--;
     }
+    // matrix.resize(numeroPresentes);
+    // for (int i = 0; i < numeroPresentes; i++) {
+    //     matrix[i].resize(numeroPresentes);
+    // }
 
     for (int h = 0; h < numeroPresentes; h++) {
-        for (int e = 0; e < numeroPresentes; e++) {
+        for (int e = h+1; e < numeroPresentes; e++) {
             matrix[h][e] = 0;        
         }
     }
@@ -98,12 +103,11 @@ void readFile(string filename, vector<vector<int>> &L, vector<vector<int>> &matr
     
     for (int w = 0; w < nElemL; w++) {
         matrix[L[w][0]-1][L[w][1]-1] = 1;
-        matrix[L[w][1]-1][L[w][0]-1] = 1;
         
     }
     int cont =0;
     for (int i = 0; i < numeroPresentes; i++) {
-        for (int j = 0; j < numeroPresentes; j++) {
+        for (int j = i+1; j < numeroPresentes; j++) {
             cout << matrix[i][j] << " ";
             if (matrix[i][j] == 1) {
                 cont++;
@@ -151,7 +155,7 @@ bool reinsertion(vector<vector<int>> &matrix, vector<vector<int>> &sol, int &ite
         if (k != t) {    
             for (int i = 0; i < sol[k].size(); i++) {
                 // cout << "item: " << item << " sol[t][item]: " << sol[t][item] << " sol[k][i]: " << sol[k][i] << " matrix[sol[t][item]-1][sol[k][i]-1]: " << matrix[sol[t][item]-1][sol[k][i]-1] << endl;
-                if (matrix[sol[t][item]-1][sol[k][i]-1] == 0) {                    
+                if ((matrix[sol[t][item]-1][sol[k][i]-1] == 0) || matrix[sol[k][i]-1][sol[t][item]-1] == 0) {                    
                     if (checkingWei(sol[t][item], sol[k], p, Q)) {
                         sol[k].push_back(sol[t][item]);
                         return true;
@@ -194,7 +198,7 @@ vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int
             int chooseItem1 = rand() % tempSol[i].size(); // escolhe um item aleatório do trenó 1
             int chooseItem2 = rand() % tempSol[j].size(); // escolhe um item aleatório do trenó 2
 
-            if (matrix[tempSol[i][chooseItem1]-1][tempSol[j][chooseItem2]-1] != 1) {
+            if ((matrix[tempSol[i][chooseItem1]-1][tempSol[j][chooseItem2]-1] != 1) || (matrix[tempSol[j][chooseItem2]-1][tempSol[i][chooseItem1]-1] != 1)) {
                 // cout << "check matrix" << endl;
                 if (checkingWei(tempSol[i][chooseItem1], tempSol[j], p, Q) && checkingWei(tempSol[j][chooseItem2], tempSol[i], p, Q)) {
                     // cout << "check weight" << endl;
@@ -303,7 +307,7 @@ void greedyalgorithm(vector<vector<int>> &matrix, vector<int> &p, int numeroPres
                     int flagTotal = 0;
                     for (int j = 0; j < copy_treno.n_presentes; j++) { // Para todos os itens que já estão no trenó
                         flagTotal++;
-                        if (matrix[presentes[i]-1][trenos[aux_treno].presentes[j].id-1] == 1) { // Se o item que quer adicionar tem conflito com algum item que já está no trenó]) {
+                        if ((matrix[presentes[i]-1][trenos[aux_treno].presentes[j].id-1] == 1) || (matrix[trenos[aux_treno].presentes[j].id-1][presentes[i]-1] == 1)) { // Se o item que quer adicionar tem conflito com algum item que já está no trenó]) {
                             aux_treno++;
                             // cout << "Entrou na re/strição " << k << endl;
                             break;
@@ -503,7 +507,7 @@ vector<vector<int>> vnd(vector<vector<int>> solution, vector<vector<int>> matrix
 
 int main(void) {
 
-    string filename = "./instances/n1000_k200_B.txt";
+    string filename = "./instances/n30_k150_C.txt";
     vector<vector<int>> L;
     vector<vector<int>> matrix;
     vector<int> p;
