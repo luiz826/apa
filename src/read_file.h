@@ -9,9 +9,6 @@
 using namespace std;
 
 
-
-// void readFile(string filename, vector<vector<int>> &L, vector<vector<int>> &matrix, vector<int> &p, int &numeroPresentes, int &k, int &Q, int &nElemL);
-
 void readFile(string filename, ProblemData &data);
 
 
