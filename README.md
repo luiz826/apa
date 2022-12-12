@@ -28,4 +28,4 @@ $ ./a.out
 
 A saída irá ser uma tabela na pasta outputs, com os dados pedidos pelo professor
 
-O cálculo do GAP e a criação da tabela estão no arquivo .ipynb, na pasta /GAP.
+O cálculo do GAP e a criação da tabela estão no arquivo .ipynb, na pasta /outputs.
