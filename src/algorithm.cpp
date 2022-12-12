@@ -15,6 +15,8 @@ using namespace std;
 bool checkingWei(int &item, vector<int> treno, vector<int> p, int Q) {
     /*  
     Checa se é possível colocar o item no trenó sem ultrapassar a capacidade de peso
+
+    O(numeroPresentes)
     */ 
 
     int sum_w = 0;
@@ -32,6 +34,8 @@ bool checkingWei(int &item, vector<int> treno, vector<int> p, int Q) {
 void swap(int &i1, int &i2) { 
     /*
     Movimento de vizinhança. 
+
+    O(1)
     */
     int temp = i1;
     i1 = i2;
@@ -41,6 +45,9 @@ void swap(int &i1, int &i2) {
 bool reinsertion(vector<vector<int>> &matrix, vector<vector<int>> &sol, int &item, int t, vector<int> p, int Q) {
     /*
     Reinsere o item em outro trenó
+    
+    complexidade -> O(k*numeroPresentes) (no pior caso sol.size() = k)
+
     */
 
     for (int k = 0; k < sol.size(); k++) { // Para cada trenó
@@ -63,6 +70,8 @@ bool reinsertion(vector<vector<int>> &matrix, vector<vector<int>> &sol, int &ite
 int fo(vector<vector<int>> solution) {
     /*
     Função objetivo
+
+    O(k)
     */
     int value = 0;
     for (auto &v : solution) {
@@ -77,6 +86,8 @@ int fo(vector<vector<int>> solution) {
 vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int>> matrix, vector<int> p, int Q) {
     /*
     Função que troca o item de um trenó para outro
+
+    O(1)
     */
     srand (time(NULL)); // serve para setar uma seed
     vector<vector<int>> best_sol = solution;
@@ -113,6 +124,8 @@ vector<vector<int>> movementSwap(vector<vector<int>> solution, vector<vector<int
 vector<vector<int>> movementReinsetion(vector<vector<int>> &solution, vector<vector<int>> matrix, vector<int> p, int Q) {
     /*
     Função que aplica o movimento de vizinhança tentando esvaziar o trenó t e colocar os itens dele em outro trenó
+
+    complexidade -> O((k*numeroPresentes)^2)
     */
 
     int best_fo_sol = fo(solution);
@@ -143,6 +156,8 @@ vector<vector<int>> movementSwapReinsetion(vector<vector<int>> &solution, vector
     /*
     Função que aplica o movimento de vizinhança tentando esvaziar o trenó t e colocar os itens dele em outro trenó
     fazendo o swap antes.
+
+    complexidade -> O((k*numeroPresentes)^2)
     */
     int best_fo_sol = fo(solution);
     vector<vector<int>> best_sol = solution;
@@ -175,9 +190,14 @@ void greedyalgorithm(ProblemData &data, vector<vector<int>> &sol) {
     /*
     Algoritmo guloso para distribuir os presentes entre os trenós
     Tendo como critério guloso inserir os itens com maior peso primeiro.
+
+    complexidade -> O(numeroPresentes^2*k)
+
     */
-    vector<treno> trenos;
-    for (int i = 0; i < data.k; i++) {
+    vector<treno> trenos; // Vetor de trenós
+    
+    // O(k)
+    for (int i = 0; i < data.k; i++) { // Cria os trenós  
         trenos.push_back(treno(data.Q)); // i -> id do treno, Q -> capacidade do treno 
     }
 
@@ -185,20 +205,23 @@ void greedyalgorithm(ProblemData &data, vector<vector<int>> &sol) {
     vector<int> presentes;
     vector<int> pesosOrd;
     multimap<int, int> presentesPesos; 
-    for (int w = 1; w < data.numeroPresentes+1; w++) {
-        presentesPesos.insert(pair<int, int>(data.p[w-1], w));
+
+    for (int w = 1; w < data.numeroPresentes+1; w++) { // O(numeroPresentes log numeroPresentes)
+        presentesPesos.insert(pair<int, int>(data.p[w-1], w)); // Insere o peso e o indice do presente no multimap 
     }    
     // Estrutura utilizada para ordenar os presentes pelo peso
     multimap<int, int>::iterator itr;
-    for (itr = presentesPesos.begin(); itr != presentesPesos.end(); itr++) {
+    for (itr = presentesPesos.begin(); itr != presentesPesos.end(); itr++) { // O(numeroPresentes)
         presentes.push_back(itr->second); // Vetor com o indice dos presentes
         pesosOrd.push_back(itr->first); // Vetor com o peso dos presentes
     }
     
+    // O(numeroPresentes^2)
     for (int i = data.numeroPresentes-1; i > 0; i--) { // Para cada presente na lista de presentes
         int menor = 0;
         int flag = 0;
         int aux_treno = 0;
+        // O(k)
         while (flag != 1) {// While para a mudança de trenós
             
             if (trenos[aux_treno].capacidade_atual == data.Q) { // Se o trenó estiver vazio
@@ -236,15 +259,18 @@ void greedyalgorithm(ProblemData &data, vector<vector<int>> &sol) {
         
     }    
     // Alocando o tamanho necessário para a solução
+
+    // O(k)
     int fo = 0;
     for (int i = 0; i < data.k; i++) {
         if (trenos[i].n_presentes > 0) {
             fo++;
         }
     }
-    sol.resize(fo);
+    sol.resize(fo); // O(k)
     
     // Inserindo no vetor solução os trenós com os presentes
+    // O(k*numeroPresentes)
     for (int i = 0; i < data.k; i++) {
         if (trenos[i].n_presentes > 0) {
             vector<int> presentes_i = trenos[i].getPresentes();
@@ -258,6 +284,8 @@ void greedyalgorithm(ProblemData &data, vector<vector<int>> &sol) {
 void vnd(vector<vector<int>> &solution, ProblemData &data) {
     /*
     Heurística que aplica os movimentos de vizinhança
+
+    complexidade -> O((k*numeroPresentes)^2*mov)
     */
     int mov = 1;
     int r = 2;
@@ -266,10 +294,10 @@ void vnd(vector<vector<int>> &solution, ProblemData &data) {
         
         switch (mov) {
             case 1:
-                sol_ = movementReinsetion(sol_, data.matrix, data.p, data.Q); // Reisertion 
+                sol_ = movementReinsetion(sol_, data.matrix, data.p, data.Q); // -> Reisertion O((k*numeroPresentes)^2)
                 break;
             case 2:
-                sol_ = movementSwapReinsetion(sol_, data.matrix, data.p, data.Q); //Swap & Reinsertion 
+                sol_ = movementSwapReinsetion(sol_, data.matrix, data.p, data.Q); //Swap & Reinsertion -> O((k*numeroPresentes)^2)
                 break;
         }
 
@@ -289,6 +317,8 @@ vector<vector<int>> naivePertubation(vector<vector<int>> solution, ProblemData &
     Para cada trenó 
     Se o trenó tiver solução com tamanho maior que um
     pega o proximo presente depois do primeiro e joga em um trenó vazio.
+
+    complexidade -> O(k)
     */
     vector<vector<int>> pertubation = solution;
     
